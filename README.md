@@ -1,4 +1,4 @@
-# Estimating UR ROLLBACK completion time.
+# Estimating UR(Unit Of Recovery) ROLLBACK completion time.
 
 ## Problem
 Ever Caught is a situation where you are called upon to do the analysis of this situation
