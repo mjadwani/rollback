@@ -40,7 +40,7 @@ When a UR undergoes a ROLLBACK it holds Xclusive locks on a objects involved in 
 It can make many nervous as the objects involved in the UR are unavailable which can cause timeouts for other transactions interested in same objects. When timeouts occur for extended amount of time it impacts business.
 
 #### **Scenario** : 
-Recently it happened a Db2 records Purge job ran for 5 hours and written 100 million log records without a commit and it reached a point where it started impacting a IMS onlines . So business decided to cancel this long running UR.Operation team went ahead and cancelled the job thinking once cancelled business will resume normally totally unaware Cancelling will initiate a Rollback in Db2 and to rollback 100 million records it will going to take time before objects can be released.
+Recently it happened a Db2 records Purge job ran for 5 hours and written 100 million log records without a commit and it reached a point where it started impacting a IMS onlines . So business decided to cancel this long running UR.Operations team went ahead and cancelled the job thinking once cancelled business will resume normally totally unaware Cancelling will initiate a Rollback in Db2 and to rollback 100 million records it will going to take time before objects can be released.
 Job was cancelled with no relief . Business Opened P1 after waiting for 45 minutes and seeing several complaints from call center , Db2 team was involved now and questions were thrown. Db2 team identified there is thread which is undergoing ROLLBACK .In this case fortunately rollback completed within 20 minutes after joing the call .
 
 #### But how to decide to allow ROLLBACK to complete or CANCEL the recovery of thread ?
