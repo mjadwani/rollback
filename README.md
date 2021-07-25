@@ -60,3 +60,25 @@ Attached is the rexx code(macro) which I wrote to predict time a rollback proces
 I tested this on 3-4 cases which were seen recently and it predicts a close enough completion time , from 5-10 samples of continuous DSNR048I message info.
 
 Hope this finds meaning for your environment also.
+
+
+## USAGE
+
+- Upload ROLLRATE REXX macro to your available REXX Dataset in SYSEXEC or SYSPROC .
+- Use either of the option
+       -  Option 1                          
+          1. Open Db2 MSTR STC in SDSF      
+          2. Issue SE JESMSGLG in SDSF              
+          3. Identify Beg URID from DSNR048I message.
+          4. On Command Line issue                   
+	          -  rollrate <URID> 
+
+          
+       -  Option 2                          
+          1. XDC  Db2 MSTR JESMSGLG      
+          2. Identify Beg URID from DSNR048I message.
+          3. On Command Line issue                   
+	          -  rollrate <URID> 
+          
+## Output
+          ![image](https://user-images.githubusercontent.com/22093620/126893065-48a76f78-3d79-4b69-98c9-8f07cf7249d1.png)
