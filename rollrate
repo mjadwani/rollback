@@ -1,0 +1,131 @@
+/* Rexx                                                   */            00010000
+/* Author  : Manoj K Jadwani                              */            00020000
+/*                                                        */            00020145
+/* Purpose : Approximate Time Db2 will take to perform    */            00020245
+/*         : full rolback.                                */            00020345
+/*                                                        */            00020445
+/* MacroName :ROLLRATE                                    */            00020545
+/* PARM      : URID                                       */            00020645
+/*                                                        */            00020745
+/* How2Use : Option 1                                     */            00020845
+/*         : 1) Open Db2 MSTR STC in SDSF                 */            00020945
+/*         : 2) Issue SE JESMSGLG in SDSF                 */            00021045
+/*         : 3) Identify Beg URID from DSNR048I message.  */            00021145
+/*         : 4) On Command Line issue                     */            00021245
+/*         :    rollrate URID                             */            00021345
+/*                                                        */            00021445
+/* How2Use : Option 2                                     */            00021545
+/*         : 1) XDC  Db2 MSTR JESMSGLG                    */            00021645
+/*         : 2) Identify Beg URID from DSNR048I message.  */            00021745
+/*         : 3) On Command Line issue                     */            00021845
+/*         :    rollrate URID                             */            00021945
+/*                                                        */            00022045
+/* OutPut  : Output will be display ON TSO screen.        */            00022145
+/**********************************************************/            00022245
+/* Ver  : Who :When    :  What                            */            00022345
+/*--------------------------------------------------------*/            00022445
+/* V1   : MJ  :7/24/21 :  GA                              */            00022545
+/*--------------------------------------------------------*/            00022645
+numeric digits 20                                                       00022745
+address ispexec                                                         00022845
+"ISREDIT MACRO NOPROCESS (urid)"  /* urid - starting RBA  */            00023045
+                                  /* point where Rollback */            00040140
+                                  /* will be done.        */            00040240
+/* "ISREDIT (DID) = DATAID "  */                                        00041000
+"ISREDIT X ALL"                                                         00050001
+"ISREDIT FIND '"URID"' ALL"                                             00050105
+"ISREDIT FIND DSNR048I ALL"   /* DSNR048I - Db2 message to identify */  00050240
+                              /* thread is undergoing Rollback      */  00050340
+"ISREDIT DEL X ALL"                                                     00051001
+                                                                        00052006
+"ISREDIT (lf) = LINENUM .ZFIRST "                                       00053006
+"ISREDIT (ef) = LINENUM .ZLAST"                                         00054006
+                                                                        00054140
+ef = ef - 2                   /* skip bottom 2 lines                */  00055040
+t=1 ; tstr. = ' '             /* variable to parse macro op content */  00055140
+                                                                        00055240
+                                                                        00055340
+                            /* Loop to read macro edited output       */00055440
+                            /* present in a format easy to process    */00055540
+                            /* by following steps.                    */00055640
+                                                                        00055740
+do i = lf to ef                                                         00056006
+    "ISREDIT (READ) = LINE (i) "                                        00057006
+    parse var read tstr.t                                               00058006
+      if (pos(" FOR",tstr.t) <>0)then                                   00058206
+         do                                                             00058306
+         temp = tstr.t                                                  00058506
+         t=t-1                                                          00058606
+         tstr.t = tstr.t ||" "|| temp                                   00058706
+         tstr.t = space(tstr.t)                                         00058822
+         end                                                            00058906
+         t= t + 1                                                       00059006
+end i                                                                   00059106
+                                                                        00059210
+ /* filter further which do not have FOR in message               */    00059340
+ /* if multiple DSNR048I messages this logic should take care     */    00059440
+                                                                        00059540
+msg_time.=' '; ti=1         /* variable holds timestamp for DSNR048I */ 00059640
+tmin1= t -1                 /* skip last unformatted line .          */ 00059740
+                                                                        00059840
+if (tmin1 < 2) then         /* At least 2 samples for approximation  */ 00059944
+   do                                                                   00060044
+   say "Atleast 2 samples needed for approximation"                     00060144
+   exit                                                                 00060244
+   end                                                                  00060344
+                                                                        00060444
+do x= 1 to tmin1                                                        00060540
+  if (pos(" FOR",tstr.x) <>0)then                                       00060740
+      do                                                                00060840
+       parse var tstr.x msg_time.ti .                                   00060940
+       msg_time.ti = strip(msg_time.ti,'b',' ')                         00061040
+       parse var msg_time.ti hh'.'mm'.'ss                               00061140
+      cmsg_time.ti = hh*3600+mm*60+ss         /* converts timstamp */   00061252
+                                              /* to seconds        */   00061340
+       curRBA.ti =word(tstr.x,14)             /* curRBA holds RBA  */   00061440
+       ultRBA = word(tstr.x,17)               /* value displayed on*/   00061550
+       ti=ti+1                                                          00061648
+                                              /* Db2 message.      */   00061740
+                                                                        00061840
+      end                                                               00061940
+end x                                                                   00062140
+       ti=ti-1                                                          00062248
+       say ti                                                           00062353
+       if ti <2 then                                                    00062454
+        do                                                              00062554
+        say "Atleast 2 samples needed for approximation"                00062654
+        exit                                                            00062754
+        end                                                             00062854
+ /* msgAppearIntv -->time between Db2 message appear on Console    */   00062940
+ /* Helps to calculate RBA rate in rollback                        */   00063040
+ /*                                                                */   00063140
+ say "Rollback Started At :"word(msg_time.1,1)                          00063251
+ msgAppearIntv = (cmsg_time.ti  - cmsg_time.1)/(ti-1) /* seconds */     00063352
+ say msgAppearIntv                                                      00063452
+ sumRBA = 0          /* will be used to calculate average RBA rollback*/00063552
+ /* RBA Difference at each message  display */                          00063652
+ do ot = 1 to ti                                                        00063752
+    if (ot+1) > ti    then                                              00063852
+       do                                                               00063952
+       leave                                                            00064052
+       end                                                              00064152
+    nxt=ot +1                                                           00064252
+    diffRBA.ot = x2d(curRBA.ot) - x2d(curRBA.nxt)                       00064352
+    sumRBA = sumRBA + diffRBA.ot                                        00064452
+ end ot                                                                 00064552
+ /* *****************************************/                          00064652
+                                                                        00064752
+ avgrollbackBYTE =  sumRBA/ti                                           00064849
+ avgrollbackPS =avgrollbackBYTE/msgAppearIntv                           00064940
+                                                                        00065040
+ say "Average RBA Rollback per second: "trunc(avgrollbackPS,2)          00065140
+                                                                        00065240
+ ultRBA = x2d(ultRBA)                                                   00065350
+ fcurRBA  =   x2d(curRBA.1)                                             00065445
+ rbaDEC = fcurRBA - ultRBA      /* number of bytes for Db2 to read */   00065545
+ timetoROLLBACK = (rbaDEC / avgrollbackPS )                             00065645
+ timetoROLLBACKmin  = trunc(timetoROLLBACK/60,2)                        00065745
+                                                                        00065845
+ say "Approx Time to Rollback in minutes : " timetoROLLBACKmin          00065940
+exit                                                                    00070000
+
