@@ -66,19 +66,44 @@ Hope this finds meaning for your environment also.
 
 - Upload ROLLRATE REXX macro to your available REXX Dataset in SYSEXEC or SYSPROC .
 - Use either of the option
-       -  Option 1                          
-          1. Open Db2 MSTR STC in SDSF      
-          2. Issue SE JESMSGLG in SDSF              
-          3. Identify Beg URID from DSNR048I message.
-          4. On Command Line issue                   
-	          -  rollrate <URID> 
-
-          
-       -  Option 2                          
-          1. XDC  Db2 MSTR JESMSGLG      
-          2. Identify Beg URID from DSNR048I message.
-          3. On Command Line issue                   
-	          -  rollrate <URID> 
+  - Option 1                          
+    1. Open Db2 MSTR STC in SDSF      
+    2. Issue SE JESMSGLG in SDSF              
+    3. Identify Beg URID from DSNR048I message .URID is 0000000003304A352927 in below message.
+    ```
+    DSNR048I  =DBXX- DSNRBMON UR BACKOUT PROCESSING LOG  186             
+	RECORD                                                               
+          AT RBA 0000000003307D661C80 TO RBA **0000000003304A352927** FOR
+           CORRELATION NAME = ENTRXXXX0005                           
+          CONNECTION ID  = CIUXXXX                                  
+          LUWID = XXXXX.LUDBU4.DA08606DF146 = 7587                 
+          PLAN NAME = XXX0403                                        
+          AUTHID = DEVXXXX                                           
+          END USER ID = *                                            
+          TRANSACTION NAME = ENTRME06                                
+          WORKSTATION NAME = *    
+    ```
+    4. On Command Line issue **rollrate URID**
+	
+  - Option 2                          
+    1. XDC  Db2 MSTR JESMSGLG      
+    2. Identify Beg URID from DSNR048I message . URID is 0000000003304A352927 in below message.
+    ```
+    DSNR048I  =DBXX- DSNRBMON UR BACKOUT PROCESSING LOG  186             
+	RECORD                                                               
+          AT RBA 0000000003307D661C80 TO RBA **0000000003304A352927** FOR
+           CORRELATION NAME = ENTRXXXX0005                           
+          CONNECTION ID  = CIUXXXX                                  
+          LUWID = XXXXX.LUDBU4.DA08606DF146 = 7587                 
+          PLAN NAME = XXX0403                                        
+          AUTHID = DEVXXXX                                           
+          END USER ID = *                                            
+          TRANSACTION NAME = ENTRME06                                
+          WORKSTATION NAME = *    
+    ```
+    3. On Command Line issue **rollrate URID**
+	
+	
           
 ## Output
    
