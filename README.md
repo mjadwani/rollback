@@ -1,7 +1,7 @@
 # Estimating UR(Unit Of Recovery) ROLLBACK completion time.
 
 ## Problem
-Ever Caught is a situation where you are called upon to do the analysis of this situation
+Ever Caught in a situation where you are called upon to do the analysis of this situation
 
 ```
 DSNR048I  =DBXX- DSNRBMON UR BACKOUT PROCESSING LOG  186             
